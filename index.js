@@ -1,5 +1,5 @@
 const { JSDOM } = require('jsdom');
-// const fs = require('fs');  // Import the fs module to handle file writing
+const fs = require('fs');  // Import the fs module to handle file writing
 const { default: axios } = require('axios');
 
 const express = require('express');
@@ -432,15 +432,18 @@ let urlWithCategory = ReutersCategoryUrlsObj[category] || `${url}/${category}`;
       {
         method: 'GET',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
           'Connection': 'keep-alive',
-          'Referer': `${url}`,
-        }
+          'Upgrade-Insecure-Requests': '1',
+        },
       }
     );
     const html = await res.text();
-    // fs.writeFileSync('Reuters.html', html); // Save the HTML for debugging
+    fs.writeFileSync('Reuters.html', html); // Save the HTML for debugging
 
     const dom = new JSDOM(html);
     const document = dom.window.document;
@@ -510,10 +513,10 @@ const saveNewsApiCall = async (category, brodcaster, news) => {
 
 const init = async () => {
   for (let i = 0; i < newsTopicArr.length; i++) {
-  await fetchAndExtractGuardianArticles('https://www.theguardian.com', newsTopicArr[i])
-  await fetchAndExtractBBCArticles('https://www.bbc.com', newsTopicArr[i]);
-  await fetchAndExtractCNNArticles('https://edition.cnn.com', newsTopicArr[i])
-  await fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', newsTopicArr[i]) // gett all the data but heading and article link have to defrentiate
+  // await fetchAndExtractGuardianArticles('https://www.theguardian.com', newsTopicArr[i])
+  // await fetchAndExtractBBCArticles('https://www.bbc.com', newsTopicArr[i]);
+  // await fetchAndExtractCNNArticles('https://edition.cnn.com', newsTopicArr[i])
+  // await fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', newsTopicArr[i]) // gett all the data but heading and article link have to defrentiate
   await fetchAndExtractReutersrticles('https://www.reuters.com', newsTopicArr[i])
   }
 
