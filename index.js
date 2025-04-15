@@ -431,14 +431,10 @@ let urlWithCategory = ReutersCategoryUrlsObj[category] || `${url}/${category}`;
     const res = await fetch(urlWithCategory, {
       method: 'GET',
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Cache-Control': 'no-cache',
+        'Referer': `${url}`,
       },
       timeout: 10000, // 10s timeout
     });
@@ -519,7 +515,7 @@ const init = async () => {
   // await fetchAndExtractBBCArticles('https://www.bbc.com', newsTopicArr[i]);
   // await fetchAndExtractCNNArticles('https://edition.cnn.com', newsTopicArr[i])
   // await fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', newsTopicArr[i]) // gett all the data but heading and article link have to defrentiate
-  await fetchAndExtractReutersrticles('https://www.reuters.com', newsTopicArr[i])
+  await fetchAndExtractReutersrticles('http://api.scrape.do?token=ca19519a8d84466e940c8ce35a702a0aa192a7d6e07&url=https://www.reuters.com', newsTopicArr[i])
   }
 
 }
