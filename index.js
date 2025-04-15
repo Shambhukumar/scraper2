@@ -1,5 +1,5 @@
 const { JSDOM } = require('jsdom');
-const fs = require('fs');  // Import the fs module to handle file writing
+// const fs = require('fs');  // Import the fs module to handle file writing
 const { default: axios } = require('axios');
 
 const express = require('express');
@@ -428,22 +428,24 @@ const fetchAndExtractReutersrticles = async (url, category) => {
 let urlWithCategory = ReutersCategoryUrlsObj[category] || `${url}/${category}`;
 
   try {
-    const res = await fetch(urlWithCategory,
-      {
-        method: 'GET',
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
-          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
-        },
-      }
-    );
+    const res = await fetch(urlWithCategory, {
+      method: 'GET',
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Cache-Control': 'no-cache',
+      },
+      timeout: 10000, // 10s timeout
+    });
+
     const html = await res.text();
-    fs.writeFileSync('Reuters.html', html); // Save the HTML for debugging
+    console.log(`Reuters Status: ${res.status} ${res.statusText}`);
+    // fs.writeFileSync('Reuters.html', html); // Save the HTML for debugging
 
     const dom = new JSDOM(html);
     const document = dom.window.document;
