@@ -2,6 +2,12 @@ const { JSDOM } = require('jsdom');
 // const fs = require('fs');  // Import the fs module to handle file writing
 const { default: axios } = require('axios');
 
+const express = require('express');
+const app = express();
+
+// Use Render's assigned port
+const port = process.env.PORT || 3000;
+
 
 const APP_BASE_URL = "https://archer-api.netlify.app/.netlify/functions/server/"
 
@@ -40,8 +46,24 @@ const fetchAndExtractGuardianArticles = async (url, category) => {
     const res = await fetch(urlWithCategory);
     const html = await res.text();
 
-    // Use jsdom to create a virtual DOM from the fetched HTML
-    const dom = new JSDOM(html);
+   // Step 2: Create JSDOM instance with proper options
+   const cleanedHtml = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+   // Step 3: Create JSDOM instance with silent virtual console
+   const virtualConsole = new (require('jsdom').VirtualConsole)();
+   // Discard all output (logs, errors, warnings)
+   virtualConsole.sendTo({
+     log: () => {},   // Ignore console.log
+     error: () => {}, // Ignore console.error
+     warn: () => {},  // Ignore console.warn
+     info: () => {}   // Ignore console.info
+   });
+
+   const dom = new JSDOM(cleanedHtml, {
+     virtualConsole,
+     runScripts: 'outside-only', // Prevent inline scripts
+     pretendToBeVisual: false // Disable visual rendering
+   });
     const document = dom.window.document;
 
     const FilteredNews = [];
@@ -256,10 +278,10 @@ const fetchAndExtractTOIrticles = async (url, category) => {
 
     const TOICategoryUrlsObj = {
       home: `${url}/`,
-      'politics': `${url}/politics/news`,
-      'sports': `${url}//sports/cricket`,
+      'politics': `${url}/elections`,
+      'sports': `${url}/sports`,
       'health': `${url}/topic/health`,
-      'Middle East': `${url}/topic/middle-east-war/news`,
+      'Middle East': `${url}/world/middle-east/2`,
       'Ukraine Russia': `${url}/topic/ukraine/news`,
       'asia': `${url}/topic/asia/news`,
       'uk': `${url}/topic/uk/news`,
@@ -276,35 +298,105 @@ const fetchAndExtractTOIrticles = async (url, category) => {
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
-    const figures = document.querySelectorAll('figure');
-    const arrayList = Array.from(figures);
-
+    
     const filteredNews = [];
 
-    arrayList.forEach((element)=> {
-      const img = element.querySelector("img")?.getAttribute('data-src');
-      const anchor = element.querySelector("a")?.href;
-      const headingEl = element.querySelector('figcaption')?.textContent;
+    // const scenario1 = () => {
+    //   const figures = document.querySelectorAll('figure');
+    //   const arrayList = Array.from(figures);
+  
+    //   arrayList.forEach((element)=> {
+    //     const img = element.querySelector("img")?.getAttribute('data-src');
+    //     const anchor = element.querySelector("a")?.href;
+    //     const headingEl = element.querySelector('figcaption')?.textContent;
+  
+      
+    //     if (img && anchor && headingEl) {
+    //       const imge = img;
+    //       const heading = headingEl
+    //       const articleLink = anchor;
+  
+    //       if (heading.length > 10) {
+    //         filteredNews.push({
+    //           image: imge,
+    //           heading,
+    //           articleLink,
+    //           broadcaster: "TOI",
+    //           category,
+    //           articleText: null,
+    //         });
+    //       }
+    //     }
+  
+    //   })
+    // }
+
+    // const scenario2 = () =>{
+    //   const selectedArcticleContainerWithClass = document.querySelectorAll('.iN5CR');
+    //   const arrayList = Array.from(selectedArcticleContainerWithClass);
+
+    //   arrayList.forEach((element)=> {
+
+    //     const img = element.querySelector("img")?.getAttribute('data-src');
+    //     const anchor = element.querySelector("a")?.href;
+    //     const headingEl = element.querySelector('a')?.textContent;
+
+    //     if (img && anchor && headingEl) {
+    //       const imge = img;
+    //       const heading = headingEl
+    //       const articleLink = anchor;
+  
+    //       if (heading.length > 10) {
+    //         filteredNews.push({
+    //           image: imge,
+    //           heading,
+    //           articleLink,
+    //           broadcaster: "TOI",
+    //           category,
+    //           articleText: null,
+    //         });
+    //       }
+    //     }
+  
+    //   })
+    // }
+
+    // scenario1()
 
     
+
+    // if(filteredNews.length == 0){
+    //   scenario2()
+    // }
+
+    const selectedArcticleContainerWithClass = document.querySelectorAll('a');
+    const arrayList = Array.from(selectedArcticleContainerWithClass);
+
+    arrayList.forEach((element)=> {
+
+      const img = element.querySelector("img")?.src || element.querySelector("img")?.getAttribute('data-src');
+      const anchor = element?.href;
+      const headingEl = element?.textContent;
+
       if (img && anchor && headingEl) {
-        const imge = img;
-        const heading = headingEl
-        const articleLink = anchor;
-
-        if (heading.length > 10) {
-          filteredNews.push({
-            image: imge,
-            heading,
-            articleLink,
-            broadcaster: "TOI",
-            category,
-            articleText: null,
-          });
+          const imge = img;
+          const heading = headingEl
+          const articleLink = anchor;
+  
+          if (heading.length > 10) {
+            filteredNews.push({
+              image: imge,
+              heading,
+              articleLink,
+              broadcaster: "TOI",
+              category,
+              articleText: null,
+            });
+          }
         }
-      }
-
+    
     })
+   
 
     await saveNewsApiCall(category, "TOI", filteredNews)
 
@@ -359,10 +451,10 @@ let urlWithCategory = ReutersCategoryUrlsObj[category] || `${url}/${category}`;
     const filteredNews = [];
 
     arrayList.forEach((element)=> {
-      const headingEl = element.querySelector('[data-testid="Heading"]')?.textContent;
-      const image = element.querySelector('img')?.src;
+      const headingEl = element.querySelector('[data-testid="Heading"]')?.textContent || element.querySelector('[data-testid="TitleHeading"]')?.textContent;
+      const image = element.querySelector('img')?.src || element.querySelector('[data-testid="Image"]')?.querySelector('img')?.src;
       const description = element.querySelector('[data-testid="Description"]')?.textContent;
-      const articleLink = element.querySelector('[data-testid="Heading"]')?.href;    
+      const articleLink = element.querySelector('[data-testid="Heading"]')?.href || element.querySelector('[data-testid="TitleLink"]')?.href;   
       // console.log(headingEl)
       if (image && headingEl) {
       
@@ -413,7 +505,7 @@ const saveNewsApiCall = async (category, brodcaster, news) => {
  }
 
 
-
+//  fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', 'newsTopicArr[i]')
 
 
 const init = async () => {
@@ -421,12 +513,38 @@ const init = async () => {
   await fetchAndExtractGuardianArticles('https://www.theguardian.com', newsTopicArr[i])
   await fetchAndExtractBBCArticles('https://www.bbc.com', newsTopicArr[i]);
   await fetchAndExtractCNNArticles('https://edition.cnn.com', newsTopicArr[i])
-  await fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', newsTopicArr[i])
+  await fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', newsTopicArr[i]) // gett all the data but heading and article link have to defrentiate
   await fetchAndExtractReutersrticles('https://www.reuters.com', newsTopicArr[i])
   }
 
 }
 
   
-init()
+// init()
 
+
+
+// Endpoint to trigger runScript and init
+app.get('/run', (req, res) => {
+  try {
+      init()
+      res.json({
+          status: 'success',
+      });
+  } catch (error) {
+      res.status(500).json({
+          status: 'error',
+          message: error.message
+      });
+  }
+});
+
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
