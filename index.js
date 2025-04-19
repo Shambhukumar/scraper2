@@ -301,73 +301,19 @@ const fetchAndExtractTOIrticles = async (url, category) => {
     
     const filteredNews = [];
 
-    // const scenario1 = () => {
-    //   const figures = document.querySelectorAll('figure');
-    //   const arrayList = Array.from(figures);
-  
-    //   arrayList.forEach((element)=> {
-    //     const img = element.querySelector("img")?.getAttribute('data-src');
-    //     const anchor = element.querySelector("a")?.href;
-    //     const headingEl = element.querySelector('figcaption')?.textContent;
-  
-      
-    //     if (img && anchor && headingEl) {
-    //       const imge = img;
-    //       const heading = headingEl
-    //       const articleLink = anchor;
-  
-    //       if (heading.length > 10) {
-    //         filteredNews.push({
-    //           image: imge,
-    //           heading,
-    //           articleLink,
-    //           broadcaster: "TOI",
-    //           category,
-    //           articleText: null,
-    //         });
-    //       }
-    //     }
-  
-    //   })
-    // }
-
-    // const scenario2 = () =>{
-    //   const selectedArcticleContainerWithClass = document.querySelectorAll('.iN5CR');
-    //   const arrayList = Array.from(selectedArcticleContainerWithClass);
-
-    //   arrayList.forEach((element)=> {
-
-    //     const img = element.querySelector("img")?.getAttribute('data-src');
-    //     const anchor = element.querySelector("a")?.href;
-    //     const headingEl = element.querySelector('a')?.textContent;
-
-    //     if (img && anchor && headingEl) {
-    //       const imge = img;
-    //       const heading = headingEl
-    //       const articleLink = anchor;
-  
-    //       if (heading.length > 10) {
-    //         filteredNews.push({
-    //           image: imge,
-    //           heading,
-    //           articleLink,
-    //           broadcaster: "TOI",
-    //           category,
-    //           articleText: null,
-    //         });
-    //       }
-    //     }
-  
-    //   })
-    // }
-
-    // scenario1()
-
+    function getImageUrlWithArticleNumber(articleUrl) {
+      // Step 1: Extract the number from the article URL
+      const articleRegex = /\/(\d+)\.cms$/; // Matches the number before ".cms" at the end
+      const articleMatch = articleUrl.match(articleRegex);
+      if (!articleMatch) return null; // Return null if no number is found
     
-
-    // if(filteredNews.length == 0){
-    //   scenario2()
-    // }
+      const articleNumber = articleMatch[1]; // Extracted number (e.g., "120414107")
+    
+      // Step 2: Hardcode the image URL with the extracted number
+      const imageUrl = `https://static.toiimg.com/thumb/imgsize-38014,msid-${articleNumber},width-600,resizemode-4/${articleNumber}.jpg`;
+    
+      return imageUrl;
+    }
 
     const selectedArcticleContainerWithClass = document.querySelectorAll('a');
     const arrayList = Array.from(selectedArcticleContainerWithClass);
@@ -379,13 +325,13 @@ const fetchAndExtractTOIrticles = async (url, category) => {
       const headingEl = element?.textContent;
 
       if (img && anchor && headingEl) {
-          const imge = img;
+          // const imge = img;
           const heading = headingEl
           const articleLink = anchor;
   
           if (heading.length > 10) {
             filteredNews.push({
-              image: imge,
+              image: getImageUrlWithArticleNumber(articleLink),
               heading,
               articleLink,
               broadcaster: "TOI",
