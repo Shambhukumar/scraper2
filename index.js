@@ -511,11 +511,11 @@ const saveNewsApiCall = async (category, brodcaster, news) => {
 
 const init = async () => {
   for (let i = 0; i < newsTopicArr.length; i++) {
-  // await fetchAndExtractGuardianArticles('https://www.theguardian.com', newsTopicArr[i])
-  // await fetchAndExtractBBCArticles('https://www.bbc.com', newsTopicArr[i]);
-  // await fetchAndExtractCNNArticles('https://edition.cnn.com', newsTopicArr[i])
+  await fetchAndExtractGuardianArticles('https://www.theguardian.com', newsTopicArr[i])
+  await fetchAndExtractBBCArticles('https://www.bbc.com', newsTopicArr[i]);
+  await fetchAndExtractCNNArticles('https://edition.cnn.com', newsTopicArr[i])
   await fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', newsTopicArr[i]) // gett all the data but heading and article link have to defrentiate
-  // await fetchAndExtractReutersrticles('http://api.scrape.do?token=ca19519a8d84466e940c8ce35a702a0aa192a7d6e07&url=https://www.reuters.com', newsTopicArr[i])
+  await fetchAndExtractReutersrticles('http://api.scrape.do?token=ca19519a8d84466e940c8ce35a702a0aa192a7d6e07&url=https://www.reuters.com', newsTopicArr[i])
   }
 
 }
