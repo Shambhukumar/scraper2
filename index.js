@@ -559,7 +559,7 @@ const init = async () => {
   await fetchAndExtractCNNArticles('https://edition.cnn.com', newsTopicArr[i])
   await fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', newsTopicArr[i]) // gett all the data but heading and article link have to defrentiate
   await fetchAndExtractReutersrticles('http://api.scrape.do?token=ca19519a8d84466e940c8ce35a702a0aa192a7d6e07&url=https://www.reuters.com', newsTopicArr[i])
-  await fetchAndExtractEconomistArticles('https://www.economist.com', 'Middle East');
+  await fetchAndExtractEconomistArticles('https://www.economist.com', newsTopicArr[i]);
 }
 
 }
