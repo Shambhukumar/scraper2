@@ -532,7 +532,7 @@ const fetchAndExtractEconomistArticles = async (url, category) => {
 
 const saveNewsApiCall = async (category, brodcaster, news) => {
   try {
-    if(news.length > 9 ){
+    if(news.length >= 9 ){
      const response = await axiosInstance.post(`saveNews`, {
        data: {
          Category: category,
