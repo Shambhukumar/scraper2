@@ -75,9 +75,11 @@ const fetchAndExtractGuardianArticles = async (url, category) => {
     listItems.forEach((element) => {
       const anchor = element.querySelector('a');
       const img = element.querySelector('img');
-      const heading = anchor?.parentElement?.querySelector('.card-headline')?.textContent.trim();
+      // const heading = anchor?.parentElement?.querySelector('.card-headline')?.querySelector('a')?.getAttribute('aria-label');
+      const heading = anchor?.getAttribute('aria-label');
       const articleText = anchor?.parentElement?.querySelector('.show-underline')?.textContent.trim();
       const imgSource = anchor?.parentElement?.querySelector('source')?.getAttribute('srcset');
+      // console.log(heading)
 
       if (anchor && heading && articleText && imgSource) {
         const currentNews = {
@@ -90,6 +92,7 @@ const fetchAndExtractGuardianArticles = async (url, category) => {
         };
 
         FilteredNews.push(currentNews);
+        console.log(currentNews);
       }
     });
 
@@ -105,7 +108,7 @@ const fetchAndExtractGuardianArticles = async (url, category) => {
 
     await saveNewsApiCall(category, "Guardian", news)
 
-    console.log(`✅ JSON file saved at ${filePath}`);
+    console.log(`✅ ${category} Request Completed`);
   } catch (error) {
     console.error('❌ Error fetching or parsing the page:', error.message);
   }
@@ -204,7 +207,7 @@ const fetchAndExtractBBCArticles = async (url, category) => {
       const filePath = './BBC_articles.json';
       // fs.writeFileSync(filePath, JSON.stringify(articleWithDetails, null, 2));
   
-      console.log(`✅ JSON file saved at ${filePath}`);
+      console.log(`✅ ${category} Request Completed`);
   
  
 
@@ -265,7 +268,7 @@ const fetchAndExtractCNNArticles = async (url, category) => {
 
     const filePath = './cnn_articles.json';
     // fs.writeFileSync(filePath, JSON.stringify(filteredNews, null, 2));
-    console.log(`✅ CNN JSON file saved at ${filePath}`);
+    console.log(`✅ CNN ${category} Request Completed`);
 
     return filteredNews;
 
@@ -350,7 +353,7 @@ const fetchAndExtractTOIrticles = async (url, category) => {
     
     const filePath = './TOI_articles.json';
     // fs.writeFileSync(filePath, JSON.stringify(filteredNews, null, 2));
-    console.log(`✅ TOI JSON file saved at ${filePath}`);
+    console.log(`✅ TOI ${category} Request Completed`);
 
     return filteredNews;
 
@@ -423,7 +426,7 @@ let urlWithCategory = ReutersCategoryUrlsObj[category] || `${url}/${category}`;
 
     const filePath = './Reuters_articles.json';
     // fs.writeFileSync(filePath, JSON.stringify(filteredNews, null, 2));
-    console.log(`✅ TOI JSON file saved at ${filePath}`);
+    console.log(`✅ TOI ${category} Request Completed`);
 
     return filteredNews;
 
@@ -432,19 +435,118 @@ let urlWithCategory = ReutersCategoryUrlsObj[category] || `${url}/${category}`;
   }
 };
 
+// const fetchAndExtractEconomistArticles = async (url, category) => {
+//   try {
+//     const EconomistCategoryUrlsObj = {
+//       home: `${url}/`,
+//       Asia: `${url}/topics/asia`,
+//       'world': `${url}/topics/economy`,
+//       'politics': `${url}/topics/geopolitics`,
+//       'business': `${url}/weeklyedition/`,
+//       'sports': `${url}/topics/culture`,
+//       'health': `${url}/topics/artificial-intelligence`,
+//       'Middle East': `${url}/topics/war-in-the-middle-east`,
+//       'Ukraine Russia': `${url}/topics/ukraine-at-war`,
+//       'uk': `${url}/topics/britain`,
+//     };
+//     let urlWithCategory = EconomistCategoryUrlsObj[category] || `${url}/${category.toLowerCase()}`;
+//     console.log(`Fetching URL: ${urlWithCategory}`);
+
+//     const res = await fetch(urlWithCategory, {
+//       headers: {
+//         'User-Agent': 'Mozilla/5.0 (compatible; MyScraper/1.0)',
+//         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+//       },
+//     });
+//     if (!res.ok) {
+//       throw new Error(`HTTP error: ${res.status} ${res.statusText}`);
+//     }
+//     const html = await res.text();
+
+//     // Initialize JSDOM with error handling
+//     const dom = new JSDOM(html);
+//     const document = dom.window.document;
+
+//     // Find all divs with an h3 containing an <a> (indicating a potential article)
+//     let potentialArticles = document.querySelectorAll('div h3 a');
+//     console.log(`Found ${potentialArticles.length} potential articles with div h3 a`);
+
+//     const filteredNews = [];
+//     potentialArticles.forEach((anchor) => {
+//       // Get the parent div that likely contains the article
+//       // const articleDiv = anchor.closest('div');
+//       // if (!articleDiv) return;
+
+//       // Check for img and description within the article div
+
+//        // Get the outer div containing both h3 a and figure img
+//        let articleDiv = anchor.closest('div:has(figure img)') || anchor.closest('div');
+//        if (!articleDiv) {
+//          console.log(`No articleDiv for "${anchor.textContent.trim().slice(0, 20)}..."`);
+//          return;
+//        }
+ 
+//        // If closest('div:has(figure img)') fails, try parent traversal
+//        if (!articleDiv.querySelector('figure img')) {
+//          const parentDiv = articleDiv.parentElement;
+//          articleDiv = parentDiv?.querySelector('div:has(figure img)') || articleDiv;
+//        }
+  
+//        // Check for img within a figure
+//        const img = articleDiv.querySelector('figure img');
+//       //  console.log(`Image for "${anchor.textContent.trim().slice(0, 20)}...": ${img ? img.src : 'null'}`);
+//       const descriptionEl = articleDiv.querySelector('p');
+//       const heading = anchor.textContent.trim();
+
+//       // console.log('ArticleDiv HTML:', articleDiv.outerHTML);
+
+//       // Ensure the article has a valid headline and link
+//       if (heading.length > 10 && anchor.href) {
+//         const articleLink = anchor.href.startsWith('http')
+//           ? anchor.href
+//           : new URL(anchor.href, url).href;
+//         const imge = img ? img.src : null;
+//         const description = descriptionEl ? descriptionEl.textContent.trim() : null;
+
+//         filteredNews.push({
+//           image: imge,
+//           heading,
+//           articleLink,
+//           broadcaster: 'The Economist',
+//           category,
+//           articleText: description,
+//         });
+
+//         console.log('image:', imge);
+//       }
+//     });
+
+//     // console.log(`Extracted ${filteredNews.length} articles:`, filteredNews.map(n => n.heading));
+
+//     // Save to API (assuming saveNewsApiCall is defined elsewhere)
+//     // await saveNewsApiCall(category, 'Economist', filteredNews);
+
+//     return filteredNews;
+//   } catch (error) {
+//     console.error('❌ Error fetching or parsing the page:', error.message);
+//     return [];
+//   }
+// };
+
+
 const fetchAndExtractEconomistArticles = async (url, category) => {
   try {
     const EconomistCategoryUrlsObj = {
       home: `${url}/`,
       Asia: `${url}/topics/asia`,
-      'world': `${url}/topics/economy`,
-      'politics': `${url}/topics/geopolitics`,
-      'business': `${url}/weeklyedition/`,
-      'sports': `${url}/topics/culture`,
-      'health': `${url}/topics/artificial-intelligence`,
+      world: `${url}/topics/economy`,
+      politics: `${url}/topics/geopolitics`,
+      business: `${url}/weeklyedition/`,
+      sports: `${url}/topics/culture`,
+      health: `${url}/topics/artificial-intelligence`,
       'Middle East': `${url}/topics/war-in-the-middle-east`,
       'Ukraine Russia': `${url}/topics/ukraine-at-war`,
-      'uk': `${url}/topics/britain`,
+      uk: `${url}/topics/britain`,
     };
     let urlWithCategory = EconomistCategoryUrlsObj[category] || `${url}/${category.toLowerCase()}`;
     console.log(`Fetching URL: ${urlWithCategory}`);
@@ -460,65 +562,74 @@ const fetchAndExtractEconomistArticles = async (url, category) => {
     }
     const html = await res.text();
 
-    // Initialize JSDOM with error handling
+    // Initialize JSDOM
+    const { JSDOM } = require('jsdom');
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
-    // Find all divs with an h3 containing an <a> (indicating a potential article)
-    let potentialArticles = document.querySelectorAll('div h3 a');
-    console.log(`Found ${potentialArticles.length} potential articles with div h3 a`);
+    // Find all potential article headlines
+    let potentialArticles = document.querySelectorAll('h3 a');
+    console.log(`Found ${potentialArticles.length} potential articles with h3 a`);
 
     const filteredNews = [];
-    potentialArticles.forEach((anchor) => {
-      // Get the parent div that likely contains the article
-      // const articleDiv = anchor.closest('div');
-      // if (!articleDiv) return;
+    const usedImages = new Set(); // Track used image URLs
 
-      // Check for img and description within the article div
-
-       // Get the outer div containing both h3 a and figure img
-       let articleDiv = anchor.closest('div:has(figure img)') || anchor.closest('div');
-       if (!articleDiv) {
-         console.log(`No articleDiv for "${anchor.textContent.trim().slice(0, 20)}..."`);
-         return;
-       }
- 
-       // If closest('div:has(figure img)') fails, try parent traversal
-       if (!articleDiv.querySelector('figure img')) {
-         const parentDiv = articleDiv.parentElement;
-         articleDiv = parentDiv?.querySelector('div:has(figure img)') || articleDiv;
-       }
-  
-       // Check for img within a figure
-       const img = articleDiv.querySelector('figure img');
-      //  console.log(`Image for "${anchor.textContent.trim().slice(0, 20)}...": ${img ? img.src : 'null'}`);
-      const descriptionEl = articleDiv.querySelector('p');
+    potentialArticles.forEach((anchor, index) => {
+      // Log the article being processed
       const heading = anchor.textContent.trim();
+      // console.log(`Processing article ${index + 1}: "${heading.slice(0, 20)}..."`);
 
-      // console.log('ArticleDiv HTML:', articleDiv.outerHTML);
+      // Get the closest article container (try broader selectors)
+      let articleDiv = anchor.closest('div:has(figure img)') || anchor.closest('div')
+      if (!articleDiv) {
+        // console.log(`Skipped: No article container found for "${heading.slice(0, 20)}..."`);
+        return;
+      }
 
-      // Ensure the article has a valid headline and link
+      // Find the image within the article container
+      const img = articleDiv.querySelector('figure img');
+      
+      const descriptionEl = articleDiv.querySelector('p');
+      const imgSrc = img ? img.src : null;
+
+      // Validate headline and link
       if (heading.length > 10 && anchor.href) {
         const articleLink = anchor.href.startsWith('http')
           ? anchor.href
           : new URL(anchor.href, url).href;
-        const imge = img ? img.src : null;
+
+        // Check for duplicate image (optional: comment out to allow duplicates)
+        if (imgSrc && usedImages.has(imgSrc)) {
+          // console.log(`Skipped: Duplicate image "${imgSrc}" for "${heading.slice(0, 20)}..."`);
+          return;
+        }
+
+        // Add image to usedImages if present
+        if (imgSrc) {
+          usedImages.add(imgSrc);
+        }
+
         const description = descriptionEl ? descriptionEl.textContent.trim() : null;
 
-        filteredNews.push({
-          image: imge,
-          heading,
-          articleLink,
-          broadcaster: 'The Economist',
-          category,
-          articleText: description,
-        });
+        // Include article even if no image (set null or default image)
+        if(imgSrc){
+          filteredNews.push({
+            image: imgSrc, // Or use a default: imgSrc || 'https://example.com/default.jpg'
+            heading,
+            articleLink,
+            broadcaster: "The Economist",
+            category,
+            articleText: description,
+          });
+        }
+      } else {
+        // console.log(`Skipped: Invalid headline or link for "${heading.slice(0, 20)}..."`);
       }
     });
 
-    // console.log(`Extracted ${filteredNews.length} articles:`, filteredNews.map(n => n.heading));
+    console.log(`Extracted ${filteredNews.length} articles`);
 
-    // Save to API (assuming saveNewsApiCall is defined elsewhere)
+    // Optional: Save to API
     await saveNewsApiCall(category, 'Economist', filteredNews);
 
     return filteredNews;
@@ -527,8 +638,6 @@ const fetchAndExtractEconomistArticles = async (url, category) => {
     return [];
   }
 };
-
-
 
 const saveNewsApiCall = async (category, brodcaster, news) => {
   try {
@@ -550,6 +659,8 @@ const saveNewsApiCall = async (category, brodcaster, news) => {
 
 
 //  fetchAndExtractTOIrticles('https://timesofindia.indiatimes.com', 'newsTopicArr[i]')
+// fetchAndExtractGuardianArticles('https://www.theguardian.com', 'Middle East')
+// fetchAndExtractEconomistArticles('https://www.economist.com', 'home')
 
 
 const init = async () => {
@@ -563,11 +674,6 @@ const init = async () => {
 }
 
 }
-
-
-
-
-// Example usage
 
 
   
